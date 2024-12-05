@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Найди пару цветов</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .card {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            background-color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .card.flipped {
+            background-color: var(--card-color);
+        }
+        .button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Найди пару цветов</h1>
+    <div class="game-board" id="game-board">
+        <!-- Карточки будут созданы динамически -->
+    </div>
+
+    <button class="button hidden" id="reset-button" onclick="resetGame()">Начать заново</button>
+
+    <script>
+        // Массив цветов
+        const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'pink', 'cyan'];
+        let shuffledColors = [];
+        let flippedCards = [];
+        let matchedCards = 0;
+
+        // Функция для начала игры
+        function startGame() {
+            shuffledColors = [...colors, ...colors];
+            shuffledColors = shuffledColors.sort(() => Math.random() - 0.5); // Перемешиваем
+
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = ''; // Очищаем старые карточки
+
+            shuffledColors.forEach((color, index) => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.setAttribute('data-index', index);
+                card.style.setProperty('--card-color', color);
+                card.addEventListener('click', flipCard);
+                gameBoard.appendChild(card);
+            });
+        }
+
+        // Функция для переворачивания карточки
+        function flipCard(event) {
+            const card = event.target;
+
+            if (card.classList.contains('flipped') || flippedCards.length === 2) return;
+
+            card.classList.add('flipped');
+            flippedCards.push(card);
+
+            if (flippedCards.length === 2) {
+                checkForMatch();
+            }
+        }
+
+        // Проверка на совпадение
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.style.getPropertyValue('--card-color') === card2.style.getPropertyValue('--card-color')) {
+                matchedCards++;
+                flippedCards = [];
+                if (matchedCards === colors.length) {
+                    setTimeout(() => {
+                        alert('Поздравляем! Вы выиграли!');
+                        document.getElementById('reset-button').classList.remove('hidden');
+                    }, 500);
+                }
+            } else {
+                setTimeout(() => {
+                    card1.classList.remove('flipped');
+                    card2.classList.remove('flipped');
+                    flippedCards = [];
+                }, 1000);
+            }
+        }
+
+        // Функция для сброса игры
+        function resetGame() {
+            matchedCards = 0;
+            flippedCards = [];
+            startGame();
+            document.getElementById('reset-button').classList.add('hidden');
+        }
+
+        // Запуск игры
+        startGame();
+    </script>
+</body>
+</html>
